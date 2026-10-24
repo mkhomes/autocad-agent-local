@@ -12,14 +12,85 @@ Important notes:
 - AutoCAD automation only works on Windows.
 - This is a prototype for local experimentation and internal workflows.
 - Ollama must be running locally on your machine.
+- The project is designed to work with AutoCAD 2022–2026 on Windows, provided the environment is configured correctly.
 
 ## Features
-- Floor plan generation from natural language prompt
+- Floor plan generation from natural language prompts
 - Local Ollama-based LLM plan generation
 - AutoCAD drawing operations via pywin32 / COM
 - Tool registry and MCP-like architecture
 - Skill-based agent orchestration
+- Validation and quality checks before export
 - API endpoint for agent execution
+- DWG/PDF generated outputs
+
+## Workflow
+
+1. Input stage
+   - DWG / DXF
+   - PDF
+   - JPG / PNG
+   - CAD template files
+
+2. Skill 00 – AutoCAD reading
+   - AI reads and interprets the source drawing
+   - Identifies key structures such as grids, walls, doors, columns, layers, and blocks
+   - Detects missing or uncertain information and asks for clarification when needed
+
+3. Project Data Store
+   - Stores structured drawing metadata in a central project repository
+   - Keeps common design data for downstream skills and validation
+
+4. 10 CAD Skills
+   - Grid / axis creation
+   - Column creation
+   - Wall generation
+   - Door insertion
+   - Connection / join logic
+   - Hatch generation
+   - Dimensioning
+   - Finish / refinement
+   - Validation
+   - Export
+
+5. CAD Validator
+   - Checks for geometric issues
+   - Detects conflicts and structural inconsistencies
+   - Validates dimensions and rule compliance
+
+6. AutoCAD integration
+   - Interacts with AutoCAD through COM / pywin32 APIs
+   - Executes drawing commands and updates the document
+
+7. Output
+   - DWG
+   - Finalized DWG
+   - PDF
+   - Validation reports / structured project data
+
+## Design philosophy
+The core principle is:
+
+Read once → store common data → draw by skill → validate continuously
+
+This approach keeps the system modular and easier to manage than a single large end-to-end drawing agent.
+
+## Requirements
+- Windows 10/11
+- Python 3.10+
+- AutoCAD installed on the machine
+- Ollama installed and running locally
+- Matching Python and AutoCAD bitness (recommended: both 64-bit)
+
+## AutoCAD 2022–2026 compatibility notes
+This project is designed to be compatible with AutoCAD 2022 through 2026 on Windows, assuming the environment is correctly configured.
+
+Important compatibility points:
+- AutoCAD automation requires Windows.
+- Python and AutoCAD must use the same architecture (for example, both 64-bit).
+- COM/pywin32 must be installed and working correctly.
+- AutoCAD trust/security settings may block some automation tasks depending on version and environment.
+- Version-specific differences can affect export behavior, plotting, and layer handling, so validation is important.
 
 ## Project structure
 
@@ -46,14 +117,9 @@ autocad-agent-local/
 ├─ .gitignore
 ├─ README.md
 ├─ requirements.txt
-└─ projects/
+├─ projects/
+└─ ...
 ```
-
-## Requirements
-- Windows 10/11
-- Python 3.10+
-- AutoCAD installed on the machine
-- Ollama installed and running locally
 
 ## Install
 
@@ -158,6 +224,7 @@ Example response:
 - This is a prototype, not a full CAD authoring platform.
 - Layer naming and blocks should be customized for your own company standards.
 - PDF export depends on AutoCAD document behavior and may need adjustments.
+- Different AutoCAD versions may require small environment-specific tuning.
 
 ## Test request
 Please test the app locally and report:
@@ -170,13 +237,14 @@ Please test the app locally and report:
 Please share the output of:
 - uvicorn startup logs
 - curl response body
-- any AutoCAD COM errors
+- AutoCAD COM errors
 
 ## Next improvements
 - add more skills: 3D model generation, dimension validation, block library insertion
 - add SQLite/PostgreSQL project history
 - add React frontend for local UI
 - add human approval before saving final drawings
+- improve compatibility testing across AutoCAD 2022–2026 versions
 
 ## License
 This project is provided as a prototype for local experimentation and development.
